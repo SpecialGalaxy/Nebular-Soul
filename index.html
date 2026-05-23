@@ -1,0 +1,889 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nebular Soul - Premium AI Coding Assistant</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/github-dark.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/marked/9.1.2/marked.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        :root {
+            --bg-dark: #060713;
+            --bg-glass: rgba(13, 17, 39, 0.6);
+            --border-glass: rgba(59, 130, 246, 0.2);
+            --neon-blue: #00f0ff;
+            --neon-purple: #9d4edd;
+            --text-main: #f3f4f6;
+            --text-muted: #9ca3af;
+            --gradient-nebula: linear-gradient(135deg, #00f0ff 0%, #7000ff 50%, #9d4edd 100%);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background-color: var(--bg-dark);
+            color: var(--text-main);
+            overflow-x: hidden;
+            min-height: 100vh;
+        }
+
+        /* --- BACKGROUND PARTICLES/STARS --- */
+        .stars {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            background: 
+                radial-gradient(white, rgba(255,255,255,.2) 2px, transparent 40px),
+                radial-gradient(white, rgba(255,255,255,.15) 1px, transparent 30px);
+            background-size: 550px 550px, 350px 350px;
+            background-position: 0 0, 40px 60px;
+            opacity: 0.2;
+            z-index: 0;
+            animation: spaceMove 100s linear infinite;
+        }
+
+        @keyframes spaceMove {
+            from { background-position: 0 0, 40px 60px; }
+            to { background-position: 550px 550px, 390px 610px; }
+        }
+
+        /* --- UTILITIES & GLASSMORPHISM --- */
+        .glass-card {
+            background: var(--bg-glass);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid var(--border-glass);
+            border-radius: 16px;
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
+        }
+
+        .neon-glow {
+            box-shadow: 0 0 15px rgba(0, 240, 255, 0.35);
+        }
+
+        .btn-premium {
+            background: var(--gradient-nebula);
+            color: white;
+            border: none;
+            padding: 12px 28px;
+            font-weight: 600;
+            border-radius: 30px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            box-shadow: 0 0 15px rgba(112, 0, 255, 0.4);
+        }
+
+        .btn-premium:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.7);
+        }
+
+        /* --- LANDING PAGE GRAPHICS --- */
+        #landing-page {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+        }
+
+        header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 20px 5%;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .logo {
+            font-size: 24px;
+            font-weight: 800;
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .hero {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            min-height: 85vh;
+            padding: 0 20px;
+        }
+
+        .hero h1 {
+            font-size: 4rem;
+            margin-bottom: 20px;
+            line-height: 1.2;
+            font-weight: 900;
+        }
+
+        .hero h1 span {
+            background: linear-gradient(to right, var(--neon-blue), var(--neon-purple));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .hero p {
+            font-size: 1.25rem;
+            color: var(--text-muted);
+            max-width: 600px;
+            margin-bottom: 40px;
+        }
+
+              /* --- DASHBOARD & WORKSPACE LAYOUT --- */
+        #app-workspace {
+            display: none;
+            height: 100vh;
+            position: relative;
+            z-index: 10;
+        }
+
+        .workspace-container {
+            display: flex;
+            height: 100%;
+            width: 100%;
+        }
+
+        /* SIDEBAR CHAT HISTORY */
+        .sidebar {
+            width: 300px;
+            background: rgba(4, 5, 15, 0.95);
+            border-right: 1px solid var(--border-glass);
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+            justify-content: space-between;
+            transition: all 0.3s ease;
+        }
+
+        .sidebar-header {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .new-chat-btn {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px dashed var(--neon-blue);
+            color: white;
+            padding: 12px;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: left;
+            font-weight: 500;
+        }
+
+        .new-chat-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+        }
+
+        .chat-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .chat-item {
+            padding: 12px;
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.02);
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid transparent;
+            transition: all 0.2s;
+        }
+
+        .chat-item:hover, .chat-item.active {
+            background: rgba(112, 0, 255, 0.15);
+            border-color: var(--border-glass);
+        }
+
+        .chat-item-actions i {
+            margin-left: 8px;
+            color: var(--text-muted);
+            transition: color 0.2s;
+        }
+
+        .chat-item-actions i:hover {
+            color: var(--neon-blue);
+        }
+
+        /* MAIN APP CHAT VIEW */
+        .main-chat-area {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            background: rgba(6, 7, 19, 0.85);
+            position: relative;
+        }
+
+        .chat-navbar {
+            padding: 15px 30px;
+            border-bottom: 1px solid var(--border-glass);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            backdrop-filter: blur(10px);
+        }
+
+        .model-selector select, .settings-modal input, .settings-modal select {
+            background: #0d1127;
+            border: 1px solid var(--border-glass);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            outline: none;
+            cursor: pointer;
+        }
+
+        .messages-container {
+            flex-grow: 1;
+            padding: 30px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .message {
+            display: flex;
+            gap: 20px;
+            max-width: 85%;
+            animation: fadeInUp 0.4s ease forwards;
+        }
+
+        .message.user {
+            align-self: flex-end;
+            flex-direction: row-reverse;
+        }
+
+        .message.assistant {
+            align-self: flex-start;
+        }
+
+        .avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            flex-shrink: 0;
+        }
+
+        .user .avatar {
+            background: var(--neon-purple);
+        }
+
+        .assistant .avatar {
+            background: var(--gradient-nebula);
+            box-shadow: 0 0 10px var(--neon-blue);
+        }
+
+        .msg-bubble {
+            padding: 15px 20px;
+            border-radius: 12px;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+
+        .user .msg-bubble {
+            background: rgba(157, 78, 221, 0.2);
+            border: 1px solid rgba(157, 78, 221, 0.4);
+        }
+
+        .assistant .msg-bubble {
+            background: rgba(13, 17, 39, 0.8);
+            border: 1px solid var(--border-glass);
+        }
+
+              /* INPUT CONTROL PANELS */
+        .input-panel {
+            padding: 20px 30px;
+            border-top: 1px solid var(--border-glass);
+            background: rgba(6, 7, 19, 0.95);
+        }
+
+        .input-container {
+            display: flex;
+            align-items: flex-end;
+            gap: 12px;
+            position: relative;
+        }
+
+        .input-container textarea {
+            flex-grow: 1;
+            background: #0d1127;
+            border: 1px solid var(--border-glass);
+            border-radius: 12px;
+            padding: 15px;
+            color: white;
+            font-size: 15px;
+            resize: none;
+            height: 55px;
+            max-height: 200px;
+            outline: none;
+            transition: border 0.3s;
+        }
+
+        .input-container textarea:focus {
+            border-color: var(--neon-blue);
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+        }
+
+        .input-actions-btn {
+            background: rgba(255,255,255,0.05);
+            border: 1px solid var(--border-glass);
+            color: white;
+            width: 50px;
+            height: 50px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .input-actions-btn:hover {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--neon-blue);
+        }
+
+        #send-btn {
+            background: var(--gradient-nebula);
+            border: none;
+        }
+
+        /* --- FILE UPLOAD PREVIEW --- */
+        .file-preview-bar {
+            display: none;
+            gap: 10px;
+            padding: 10px;
+            background: rgba(0,0,0,0.4);
+            border-radius: 8px;
+            margin-bottom: 10px;
+            align-items: center;
+        }
+
+        /* CODE BLOCK MARKDOWN ELEMENTS */
+        pre {
+            background: #111424 !important;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 15px 0;
+            overflow-x: auto;
+            border: 1px solid rgba(255,255,255,0.08);
+            position: relative;
+        }
+
+        .copy-code-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: rgba(255,255,255,0.1);
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            color: white;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        /* --- PRELOADER / TYPING BLINK --- */
+        .typing-indicator {
+            display: inline-flex;
+            gap: 4px;
+            align-items: center;
+            height: 20px;
+        }
+
+        .typing-indicator span {
+            width: 6px;
+            height: 6px;
+            background: var(--neon-blue);
+            border-radius: 50%;
+            animation: bounce 1.4s infinite ease-in-out both;
+        }
+
+        .typing-indicator span:nth-child(1) { animation-delay: -0.32s; }
+        .typing-indicator span:nth-child(2) { animation-delay: -0.16s; }
+
+        @keyframes bounce {
+            0%, 80%, 100% { transform: scale(0); }
+            40% { transform: scale(1.0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* SETTINGS MODAL */
+        .settings-modal {
+            display: none;
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-content {
+            width: 450px;
+            padding: 30px;
+            display: flex;
+            flex-direction: column;
+            gap: 20px;
+        }
+
+        /* RESPONSIVE DESIGN */
+        @media(max-width: 768px) {
+            .sidebar { position: absolute; left: -300px; height: 100%; z-index: 50; }
+            .sidebar.open { left: 0; }
+            .hero h1 { font-size: 2.5rem; }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="stars"></div>
+
+    <section id="landing-page">
+        <header>
+            <div class="logo"><i class="fa-solid fa-circle-nodes"></i> NEBULAR SOUL</div>
+            <div>
+                <button class="btn-premium" onclick="enterWorkspace()"><i class="fa-solid fa-terminal"></i> Launch IDE App</button>
+            </div>
+        </header>
+
+        <div class="hero">
+            <h1 class="glass-card" style="padding: 20px 40px; border-radius: 24px;">Architecting the Future of Code with <br><span>Nebular Soul AI</span></h1>
+            <p>A masterclass cross-platform LLM compilation machine engineered to handle vanilla implementations, robust game matrices, Discord integrations, and full-stack rendering.</p>
+            <button class="btn-premium neon-glow" onclick="enterWorkspace()">Start Coding Instantly <i class="fa-solid fa-arrow-right"></i></button>
+        </div>
+    </section>
+
+    <section id="app-workspace">
+        <div class="workspace-container">
+            <aside class="sidebar">
+                <div class="sidebar-header">
+                    <div class="logo"><i class="fa-solid fa-circle-nodes"></i> Nebular Soul</div>
+                    <button class="new-chat-btn" onclick="createNewChat()"><i class="fa-solid fa-plus"></i> New Solution Stream</button>
+                </div>
+                <div class="chat-list" id="chat-history-container">
+                    </div>
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <button class="new-chat-btn" style="border-color:var(--neon-purple)" onclick="toggleSettings()"><i class="fa-solid fa-gear"></i> Engine Settings</button>
+                </div>
+            </aside>
+
+            <main class="main-chat-area">
+                <nav class="chat-navbar">
+                    <div style="display:flex; align-items:center; gap:15px;">
+                        <h3 id="current-stream-title">Nebular Quantum Sandbox</h3>
+                    </div>
+                    <div class="model-selector">
+                        <select id="model-dropdown" onchange="switchModel(this.value)">
+                            <option value="openrouter/auto">OpenRouter Auto (Smart Routing)</option>
+                            <option value="google/gemini-2.5-flash">Gemini 2.5 Flash (Free)</option>
+                            <option value="deepseek/deepseek-chat">DeepSeek V3</option>
+                            <option value="anthropic/claude-3.5-sonnet">Claude 3.5 Sonnet</option>
+                            <option value="openai/gpt-4o">GPT-4o Engine</option>
+                        </select>
+                    </div>
+                </nav>
+
+                <div class="messages-container" id="chat-messages">
+                    <div class="message assistant">
+                        <div class="avatar"><i class="fa-solid fa-robot"></i></div>
+                        <div class="msg-bubble">
+                            Welcome to the Core Matrix of <strong>Nebular Soul</strong>. I am trained natively to process, structure, debug, and stream high-performance scripts across React, HTML/CSS/JS, Python, C++, Luau, and production configurations. Configure your System API Matrix and initialize compilation.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="input-panel">
+                    <div class="file-preview-bar" id="preview-bar">
+                        <span id="preview-filename" style="font-size:13px; color:var(--neon-blue);"></span>
+                        <i class="fa-solid fa-circle-xmark" style="cursor:pointer;" onclick="clearFileAttachment()"></i>
+                    </div>
+                    <div class="input-container">
+                        <button class="input-actions-btn" onclick="triggerFileInput()"><i class="fa-solid fa-paperclip"></i></button>
+                        <input type="file" id="hidden-file-input" style="display:none;" onchange="handleFileSelected(event)">
+                        
+                        <textarea id="user-prompt" placeholder="Describe the structural components or paste scripts to modify..." onkeydown="handleTextAreaKey(event)"></textarea>
+                        
+                        <button class="input-actions-btn" id="send-btn" onclick="processUserSubmission()"><i class="fa-solid fa-paper-plane"></i></button>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </section>
+
+    <div class="settings-modal" id="settings-panel">
+        <div class="modal-content glass-card neon-glow">
+            <h3>Nebular System Configuration Matrix</h3>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label style="font-size:12px; color:var(--text-muted);">OPENROUTER USER API KEY</label>
+                <input type="password" id="api-key-input" placeholder="sk-or-v1-...">
+            </div>
+            <div style="display:flex; flex-direction:column; gap:5px;">
+                <label style="font-size:12px; color:var(--text-muted);">DEFAULT USER CODING STYLE</label>
+                <select id="coding-preference">
+                    <option value="Vanilla, highly structured, minimal external dependencies">Strict Vanilla Core Execution</option>
+                    <option value="Object-oriented, microservice decoupled architectures">Enterprise Modular Standard</option>
+                    <option value="Highly performant, low memory profiling structures">High Performance Optimization</option>
+                </select>
+            </div>
+            <div style="display:flex; gap:10px; margin-top:10px;">
+                <button class="btn-premium" style="padding:8px 20px; font-size:12px;" onclick="saveEngineConfig()">Save Matrix Data</button>
+                <button class="btn-premium" style="padding:8px 20px; font-size:12px; background:rgba(255,255,255,0.1);" onclick="toggleSettings()">Dismiss</button>
+            </div>
+        </div>
+    </div>
+
+      <script>
+        // CLIENT ENVIRONMENT CORE STATE MEMORY MANAGEMENT SYSTEM
+        let appState = {
+            activeChatId: 'default-session',
+            chats: {
+                'default-session': {
+                    title: 'Nebular Quantum Sandbox',
+                    messages: []
+                }
+            },
+            systemConfig: {
+                apiKey: '',
+                selectedModel: 'openrouter/auto',
+                codingPreference: 'Vanilla, highly structured, minimal external dependencies'
+            },
+            attachedFileContext: null
+        };
+
+        // RUN ENGINE SYSTEM LIFECYCLE INITIALIZER
+        window.addEventListener('DOMContentLoaded', () => {
+            loadMemorySystem();
+            configureMarkdownSyntaxParser();
+        });
+
+        function configureMarkdownSyntaxParser() {
+            marked.setOptions({
+                highlight: function(code, lang) {
+                    const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                    return hljs.highlight(code, { language }).value;
+                },
+                langPrefix: 'hljs language-'
+            });
+        }
+
+        // VIEW STAGE SWAP CONTROLLERS
+        function enterWorkspace() {
+            document.getElementById('landing-page').style.display = 'none';
+            document.getElementById('app-workspace').style.display = 'flex';
+            renderSidebarStreams();
+        }
+
+        function toggleSettings() {
+            const panel = document.getElementById('settings-panel');
+            panel.style.display = (panel.style.display === 'flex') ? 'none' : 'flex';
+        }
+
+        // PERSISTENCE SYSTEMS & HARDWARE PERSISTED LOCAL STORAGE LAYER
+        function saveEngineConfig() {
+            appState.systemConfig.apiKey = document.getElementById('api-key-input').value;
+            appState.systemConfig.codingPreference = document.getElementById('coding-preference').value;
+            saveMemorySystem();
+            toggleSettings();
+        }
+
+        function loadMemorySystem() {
+            const storedState = localStorage.getItem('NEBULAR_SOUL_MATRIX_STATE');
+            if (storedState) {
+                try {
+                    const parsed = JSON.parse(storedState);
+                    if(parsed.chats) appState.chats = parsed.chats;
+                    if(parsed.systemConfig) appState.systemConfig = parsed.systemConfig;
+                    
+                    // Apply configs back to input states
+                    document.getElementById('api-key-input').value = appState.systemConfig.apiKey || '';
+                    document.getElementById('coding-preference').value = appState.systemConfig.codingPreference || 'Vanilla, highly structured, minimal external dependencies';
+                    document.getElementById('model-dropdown').value = appState.systemConfig.selectedModel || 'openrouter/auto';
+                } catch (e) {
+                    console.error("Critical error reconstructing state metrics from disk:", e);
+                }
+            }
+        }
+
+        function saveMemorySystem() {
+            localStorage.setItem('NEBULAR_SOUL_MATRIX_STATE', JSON.stringify(appState));
+        }
+
+        // CHAT OPERATIONS MANAGER
+        function createNewChat() {
+            const id = 'stream-' + Date.now();
+            appState.chats[id] = {
+                title: 'New Code Compilation',
+                messages: []
+            };
+            appState.activeChatId = id;
+            document.getElementById('current-stream-title').innerText = appState.chats[id].title;
+            clearChatDisplayArea();
+            renderSidebarStreams();
+            saveMemorySystem();
+        }
+
+        function switchChatStream(id) {
+            appState.activeChatId = id;
+            document.getElementById('current-stream-title').innerText = appState.chats[id].title;
+            clearChatDisplayArea();
+            
+            // Build old historical elements inside the chat viewport 
+            const historicalMessages = appState.chats[id].messages;
+            historicalMessages.forEach(msg => {
+                appendUIMessageBubble(msg.role, msg.content);
+            });
+            renderSidebarStreams();
+        }
+
+        function deleteChatStream(id, event) {
+            event.stopPropagation();
+            if(Object.keys(appState.chats).length <= 1) return; // Keep a sandbox trace runtime active
+            delete appState.chats[id];
+            if(appState.activeChatId === id) {
+                appState.activeChatId = Object.keys(appState.chats)[0];
+            }
+            switchChatStream(appState.activeChatId);
+        }
+
+        function clearChatDisplayArea() {
+            document.getElementById('chat-messages').innerHTML = '';
+        }
+
+        function renderSidebarStreams() {
+            const container = document.getElementById('chat-history-container');
+            container.innerHTML = '';
+            Object.keys(appState.chats).forEach(id => {
+                const item = appState.chats[id];
+                const chatEl = document.createElement('div');
+                chatEl.className = `chat-item ${id === appState.activeChatId ? 'active' : ''}`;
+                chatEl.setAttribute('onclick', `switchChatStream('${id}')`);
+                chatEl.innerHTML = `
+                    <span style="font-size:14px; text-overflow:ellipsis; overflow:hidden; white-space:nowrap; max-width:180px;"><i class="fa-regular fa-message"></i> ${item.title}</span>
+                    <div class="chat-item-actions">
+                        <i class="fa-solid fa-trash" onclick="deleteChatStream('${id}', event)"></i>
+                    </div>
+                `;
+                container.appendChild(chatEl);
+            });
+        }
+
+        function switchModel(value) {
+            appState.systemConfig.selectedModel = value;
+            saveMemorySystem();
+        }
+
+                // INTERFACE CONTROL ACTIONS
+        function handleTextAreaKey(e) {
+            if(e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                processUserSubmission();
+            }
+        }
+
+        function triggerFileInput() {
+            document.getElementById('hidden-file-input').click();
+        }
+
+        function handleFileSelected(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                appState.attachedFileContext = {
+                    name: file.name,
+                    content: e.target.result
+                };
+                document.getElementById('preview-filename').innerText = `Attached: ${file.name}`;
+                document.getElementById('preview-bar').style.display = 'flex';
+            };
+            reader.readAsText(file);
+        }
+
+        function clearFileAttachment() {
+            appState.attachedFileContext = null;
+            document.getElementById('preview-bar').style.display = 'none';
+            document.getElementById('hidden-file-input').value = '';
+        }
+
+        // APPLIED USER INTERACTION SUBMISSION ENGINE & BACKEND COMPLETION AGENT [00:04:35]
+        async function processUserSubmission() {
+            const promptInput = document.getElementById('user-prompt');
+            let text = promptInput.value.trim();
+            if(!text && !appState.attachedFileContext) return;
+
+            let promptWithContext = text;
+            if(appState.attachedFileContext) {
+                promptWithContext += `\n\n[Context attached from File: ${appState.attachedFileContext.name}]\n${appState.attachedFileContext.content}`;
+            }
+
+            // Update state models with fresh message contextual bindings
+            appState.chats[appState.activeChatId].messages.push({ role: 'user', content: promptWithContext });
+            
+            // Re-label dynamic execution title track matching prompt syntax structures
+            if(appState.chats[appState.activeChatId].messages.length === 1) {
+                appState.chats[appState.activeChatId].title = text.substring(0, 24) + '...';
+            }
+
+            appendUIMessageBubble('user', text);
+            promptInput.value = '';
+            clearFileAttachment();
+            renderSidebarStreams();
+            
+            // Build runtime processing indicator UI elements
+            const assistantMessageId = 'ai-response-' + Date.now();
+            const bubbleRef = appendUIMessageBubble('assistant', `<div class="typing-indicator"><span></span><span></span><span></span></div>`, assistantMessageId);
+            
+            // Execute remote call or fallback to sandboxed compiler emulation engine logic
+            await triggerOpenRouterStream(promptWithContext, bubbleRef);
+            saveMemorySystem();
+        }
+
+        function appendUIMessageBubble(role, content, uniqueId = null) {
+            const container = document.getElementById('chat-messages');
+            const messageWrapper = document.createElement('div');
+            messageWrapper.className = `message ${role}`;
+            if(uniqueId) messageWrapper.id = uniqueId;
+
+            const iconClass = role === 'user' ? 'fa-user' : 'fa-robot';
+            
+            // Evaluate parsed elements directly
+            let formattedContent = (role === 'assistant' && uniqueId === null) ? marked.parse(content) : content;
+
+            messageWrapper.innerHTML = `
+                <div class="avatar"><i class="fa-solid ${iconClass}"></i></div>
+                <div class="msg-bubble">${formattedContent}</div>
+            `;
+            
+            container.appendChild(messageWrapper);
+            container.scrollTop = container.scrollHeight;
+            
+            // Configure embedded bindings on immediate static outputs
+            if(role === 'assistant' && uniqueId === null) {
+                injectCodeCopyActions(messageWrapper);
+            }
+
+            return messageWrapper.querySelector('.msg-bubble');
+        }
+
+        // OPENROUTER CORE STREAM EXECUTION PIPELINE MODULE
+        async function triggerOpenRouterStream(promptText, uiTargetBubble) {
+            const key = appState.systemConfig.apiKey;
+            
+            // Setup robust contextual injection tracking configuration variables for prompt synthesis
+            const systemInstructions = `You are Nebular Soul, a premium multi-framework AI software generation engine. 
+            User Style Preference: ${appState.systemConfig.codingPreference}. 
+            Generate code blocks with appropriate standard layout architectures and implementation markers. 
+            Always format responses beautifully with markdown code blocks.`;
+
+            if(!key) {
+                // Emulated Fallback Engine Activation when Developer Token is unassigned [00:04:35]
+                setTimeout(() => {
+                    const fallbackMockMarkdown = `### Nebular Engine Core Mock Warning\n\n**System Notice:** API configuration parameters missing. \nTo live stream models like DeepSeek or Claude, please paste your access parameters inside the System Configuration Matrix [00:04:54].\n\n Here is a structural code template generated via native sandbox rules:\n\n\`\`\`javascript\n// Nebular Soul Architecture Core\nfunction computeQuantumMatrix() {\n    console.log("Nebular Soul active. Vanilla UI rendering engine running optimally.");\n}\n\`\`\``;
+                    uiTargetBubble.innerHTML = marked.parse(fallbackMockMarkdown);
+                    injectCodeCopyActions(uiTargetBubble.parentElement);
+                }, 1200);
+                return;
+            }
+
+            // Build payload arrays tracking local structural context
+            const activeHistory = appState.chats[appState.activeChatId].messages;
+            let finalMessagesPayload = [{ role: 'system', content: systemInstructions }];
+            
+            activeHistory.forEach(msg => {
+                finalMessagesPayload.push({ role: msg.role, content: msg.content });
+            });
+
+            try {
+                const response = await fetch("https://openrouter.ai/api/v1/chat/completions", {
+                    method: "POST",
+                    headers: {
+                        "Authorization": `Bearer ${key}`,
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({
+                        model: appState.systemConfig.selectedModel || "openrouter/auto",
+                        messages: finalMessagesPayload,
+                        stream: false // Using full response tracking to match clean structural extraction rules on client runtime instances
+                    })
+                });
+
+                if(!response.ok) throw new Error(`Server execution matrix fault: Status Code ${response.status}`);
+                
+                const data = await response.json();
+                const textOutput = data.choices[0].message.content;
+                
+                // Track output into contextual engine histories
+                appState.chats[appState.activeChatId].messages.push({ role: 'assistant', content: textOutput });
+                
+                uiTargetBubble.innerHTML = marked.parse(textOutput);
+                injectCodeCopyActions(uiTargetBubble.parentElement);
+
+            } catch (error) {
+                console.error(error);
+                uiTargetBubble.innerHTML = `<span style="color:red;"><i class="fa-solid fa-triangle-exclamation"></i> Transmission Failure: ${error.message}. Please verify the state of selected model availability inside OpenRouter options grid.</span>`;
+            }
+        }
+
+        // SYSTEM HOOKS FOR CODE BLOCK COPY ACTIONS
+        function injectCodeCopyActions(domScope) {
+            const preBlocks = domScope.querySelectorAll('pre');
+            preBlocks.forEach(pre => {
+                if(pre.querySelector('.copy-code-btn')) return;
+                
+                const btn = document.createElement('button');
+                btn.className = 'copy-code-btn';
+                btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`;
+                btn.onclick = function() {
+                    const codeText = pre.querySelector('code').innerText;
+                    navigator.clipboard.writeText(codeText).then(() => {
+                        btn.innerHTML = `<i class="fa-solid fa-check" style="color:var(--neon-blue);"></i> Copied!`;
+                        setTimeout(() => { btn.innerHTML = `<i class="fa-regular fa-copy"></i> Copy`; }, 2000);
+                    });
+                };
+                pre.appendChild(btn);
+            });
+        }
+    </script>
+</body>
+</html>
